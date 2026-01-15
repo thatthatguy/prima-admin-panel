@@ -1,0 +1,5 @@
+{
+  "name": "Enterprise Admin CRUD Panel",
+  "description": "A high-fidelity admin dashboard for managing database tables with CRUD operations, dynamic schema rendering, and SQL Temporal Table version history support.",
+  "requestFramePermissions": []
+}
