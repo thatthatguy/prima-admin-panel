@@ -48,5 +48,9 @@ export const POOL_ITEMS = {
   Procedures: [
     "ADD_COMMENT", "CREATE_TASK_RO", "ADD_RO_GROUP", "COMPLETE_TASK",
     "CREATE_TASK_RMOCOM", "REMOVE_PD_COPD", "ADD_COPD", "APPROVE_TASK", "REMOVE_RRMO"
+  ],
+  Actions: [
+    "Send to RMO/COM", "Send to RMO", "Send to COM", "Send to PD",
+    "Send to RO", "Send to HQ", "Send to Endorser"
   ]
 };

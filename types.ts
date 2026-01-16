@@ -27,18 +27,22 @@ export interface TemporalRecord extends RecordData {
 }
 
 // Workflow Types
-export type RoleType = 'PD' | 'CoM' | 'RmO';
-export type ConfigCategory = 'Fields' | 'Validations' | 'Procedures';
+// Expanded RoleType to match ASSET_POOL
+export type RoleType = 'PD' | 'CoM' | 'RMO' | 'RO' | 'HQ' | 'IDF' | 'PCST';
+export type ConfigCategory = 'Fields' | 'Validations' | 'Procedures' | 'Actions';
+
+export interface RoleConfig {
+  fields: string[];
+  validations: string[];
+  procedures: string[];
+  actions: string[];
+}
 
 export interface WorkflowConfig {
   id: string;
   name: string;
   phase: string;
   roles: {
-    [key in RoleType]: {
-      fields: string[];
-      validations: string[];
-      procedures: string[];
-    };
+    [key: string]: RoleConfig; // Use string key to handle any role dynamically
   };
 }

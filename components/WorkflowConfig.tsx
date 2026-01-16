@@ -13,10 +13,11 @@ import {
   Layers,
   Search as SearchIcon,
   Users,
-  Plus
+  Plus,
+  Activity
 } from 'lucide-react';
 import { WORKFLOW_PHASES, POOL_ITEMS } from '../constants';
-import { RoleType, ConfigCategory, WorkflowConfig as IWorkflowConfig } from '../types';
+import { RoleType, ConfigCategory, WorkflowConfig as IWorkflowConfig, RoleConfig } from '../types';
 
 const ASSET_POOL = {
   ...POOL_ITEMS,
@@ -44,16 +45,27 @@ const WorkflowConfigView: React.FC = () => {
   const [isPhaseOpen, setIsPhaseOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Dynamic initialization for any role
   const [config, setConfig] = useState<IWorkflowConfig['roles']>({
-    PD: { fields: [], validations: [], procedures: [] },
-    CoM: { fields: [], validations: [], procedures: [] },
-    RmO: { fields: [], validations: [], procedures: [] }
+    PD: { fields: [], validations: [], procedures: [], actions: [] },
+    CoM: { fields: [], validations: [], procedures: [], actions: [] },
+    RMO: { fields: [], validations: [], procedures: [], actions: [] }
   });
 
   const [roleGroups, setRoleGroups] = useState<RoleGroup[]>([
     { id: 'g1', roles: [{ id: 'PD-1', type: 'PD' }] },
-    { id: 'g2', roles: [{ id: 'CoM-1', type: 'CoM' }, { id: 'RmO-1', type: 'RmO' }] }
+    { id: 'g2', roles: [{ id: 'CoM-1', type: 'CoM' }, { id: 'RMO-1', type: 'RMO' }] }
   ]);
+
+  // Helper to ensure role config exists
+  const ensureRoleConfig = (role: string) => {
+    if (!config[role]) {
+      setConfig(prev => ({
+        ...prev,
+        [role]: { fields: [], validations: [], procedures: [], actions: [] }
+      }));
+    }
+  };
 
   const handleDragStart = (e: React.DragEvent, item: string, type: 'component' | 'role') => {
     e.dataTransfer.setData('text/plain', item);
@@ -66,23 +78,29 @@ const WorkflowConfigView: React.FC = () => {
     const type = e.dataTransfer.getData('type');
     if (type !== 'component') return;
 
-    const targetKey = category.toLowerCase() as keyof typeof config.PD;
-    if (!config[role][targetKey].includes(item)) {
-      setConfig(prev => ({
+    ensureRoleConfig(role);
+    const targetKey = category.toLowerCase() as keyof RoleConfig;
+    
+    setConfig(prev => {
+      const currentRoleConfig = prev[role] || { fields: [], validations: [], procedures: [], actions: [] };
+      if (currentRoleConfig[targetKey].includes(item)) return prev;
+      
+      return {
         ...prev,
         [role]: {
-          ...prev[role],
-          [targetKey]: [...prev[role][targetKey], item]
+          ...currentRoleConfig,
+          [targetKey]: [...currentRoleConfig[targetKey], item]
         }
-      }));
-    }
+      };
+    });
   };
 
   const handleDropToCanvas = (e: React.DragEvent) => {
     e.preventDefault();
-    const roleType = e.dataTransfer.getData('text/plain');
+    const roleType = e.dataTransfer.getData('text/plain') as RoleType;
     const type = e.dataTransfer.getData('type');
     if (type === 'role') {
+      ensureRoleConfig(roleType);
       const newId = `${roleType}-${Date.now()}`;
       setRoleGroups(prev => [...prev, { id: `g-${Date.now()}`, roles: [{ id: newId, type: roleType }] }]);
     }
@@ -90,9 +108,10 @@ const WorkflowConfigView: React.FC = () => {
 
   const handleDropToJoint = (e: React.DragEvent, groupId: string) => {
     e.stopPropagation(); e.preventDefault();
-    const roleType = e.dataTransfer.getData('text/plain');
+    const roleType = e.dataTransfer.getData('text/plain') as RoleType;
     const type = e.dataTransfer.getData('type');
     if (type === 'role') {
+      ensureRoleConfig(roleType);
       const newId = `${roleType}-${Date.now()}`;
       setRoleGroups(prev => prev.map(group => group.id === groupId ? { ...group, roles: [...group.roles, { id: newId, type: roleType }] } : group));
     }
@@ -103,14 +122,30 @@ const WorkflowConfigView: React.FC = () => {
   };
 
   const removeItem = (role: RoleType, category: ConfigCategory, item: string) => {
-    const targetKey = category.toLowerCase() as keyof typeof config.PD;
-    setConfig(prev => ({ ...prev, [role]: { ...prev[role], [targetKey]: prev[role][targetKey].filter(i => i !== item) } }));
+    const targetKey = category.toLowerCase() as keyof RoleConfig;
+    setConfig(prev => {
+      const roleCfg = prev[role];
+      if (!roleCfg) return prev;
+      return { 
+        ...prev, 
+        [role]: { 
+          ...roleCfg, 
+          [targetKey]: roleCfg[targetKey].filter(i => i !== item) 
+        } 
+      };
+    });
   };
 
   const filteredItems = useMemo(() => {
     const items = ASSET_POOL[repoTab] || [];
     return items.filter(item => item.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [repoTab, searchTerm]);
+
+  // Safe access for UI stats
+  const getStat = (role: RoleType, cat: ConfigCategory) => {
+    const key = cat.toLowerCase() as keyof RoleConfig;
+    return config[role]?.[key]?.length ?? 0;
+  };
 
   const RepoItemCard: React.FC<{ item: string, index?: number, isSequenced?: boolean, onRemove?: () => void }> = ({ item, index, isSequenced = false, onRemove }) => (
     <div
@@ -136,20 +171,22 @@ const WorkflowConfigView: React.FC = () => {
         <div style={{ padding: '1rem', borderBottom: '1px solid #f1f5f9' }}>
           <h3 style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '0.75rem' }}>Asset Repository</h3>
           <div style={{ display: 'flex', backgroundColor: '#f1f5f9', padding: '0.25rem', borderRadius: '0.5rem', marginBottom: '0.75rem' }}>
-            {(['Fields', 'Validations', 'Procedures', 'Roles'] as RepositoryTab[]).map(tab => (
+            {(['Fields', 'Validations', 'Procedures', 'Actions', 'Roles'] as RepositoryTab[]).map(tab => (
               <button 
                 key={tab} 
                 onClick={() => { setRepoTab(tab); if(tab !== 'Roles') setActiveCategory(tab as ConfigCategory); }} 
                 className="repo-tab"
                 style={{ 
                   flex: 1, padding: '0.5rem', border: 'none', background: repoTab === tab ? 'white' : 'transparent', 
-                  borderRadius: '0.375rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: repoTab === tab ? '#3b82f6' : '#94a3b8', boxShadow: repoTab === tab ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'
+                  borderRadius: '0.375rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifySelf: 'center',
+                  color: repoTab === tab ? '#3b82f6' : '#94a3b8', boxShadow: repoTab === tab ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                  justifyContent: 'center'
                 }}
               >
                 {tab === 'Fields' && <Layers size={14} />}
                 {tab === 'Validations' && <ShieldCheck size={14} />}
                 {tab === 'Procedures' && <Zap size={14} />}
+                {tab === 'Actions' && <Activity size={14} />}
                 {tab === 'Roles' && <Users size={14} />}
               </button>
             ))}
@@ -206,9 +243,12 @@ const WorkflowConfigView: React.FC = () => {
                   {group.roles.map((role, rIdx) => {
                     const isSelected = activeRole === role.type;
                     let style: React.CSSProperties = { borderColor: '#f1f5f9', color: '#0f172a', background: 'white' };
+                    
+                    // Specific styles for common roles, generic for others
                     if (role.type === 'PD') style = isSelected ? { background: '#ef4444', borderColor: '#fee2e2', color: 'white' } : { background: '#fef2f2', borderColor: '#fecaca', color: '#991b1b' };
                     else if (role.type === 'CoM') style = isSelected ? { background: '#2563eb', borderColor: '#dbeafe', color: 'white' } : { background: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af' };
-                    else if (role.type === 'RmO') style = isSelected ? { background: '#7c3aed', borderColor: '#ede9fe', color: 'white' } : { background: '#f5f3ff', borderColor: '#ddd6fe', color: '#5b21b6' };
+                    else if (role.type === 'RMO') style = isSelected ? { background: '#7c3aed', borderColor: '#ede9fe', color: 'white' } : { background: '#f5f3ff', borderColor: '#ddd6fe', color: '#5b21b6' };
+                    else if (isSelected) style = { background: '#334155', borderColor: '#e2e8f0', color: 'white' };
                     
                     return (
                       <div key={role.id} style={{ position: 'relative' }}>
@@ -246,7 +286,7 @@ const WorkflowConfigView: React.FC = () => {
           }}>
             <div style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9', padding: '0.375rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', gap: '4px' }}>
-                {(['Fields', 'Validations', 'Procedures'] as ConfigCategory[]).map(cat => (
+                {(['Fields', 'Validations', 'Procedures', 'Actions'] as ConfigCategory[]).map(cat => (
                   <button 
                     key={cat} 
                     onClick={() => { setActiveCategory(cat); setRepoTab(cat); }} 
@@ -257,7 +297,7 @@ const WorkflowConfigView: React.FC = () => {
                       boxShadow: activeCategory === cat ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'
                     }}
                   >
-                    {cat} <span style={{ marginLeft: '4px', opacity: 0.5 }}>{config[activeRole][cat.toLowerCase() as keyof typeof config.PD].length}</span>
+                    {cat} <span style={{ marginLeft: '4px', opacity: 0.5 }}>{getStat(activeRole, cat)}</span>
                   </button>
                 ))}
               </div>
@@ -269,10 +309,10 @@ const WorkflowConfigView: React.FC = () => {
               onDragOver={(e) => e.preventDefault()} 
               onDrop={(e) => handleDropToPopup(e, activeRole, activeCategory)}
             >
-              {config[activeRole][activeCategory.toLowerCase() as keyof typeof config.PD].map((item, idx) => (
+              {(config[activeRole]?.[activeCategory.toLowerCase() as keyof RoleConfig] || []).map((item, idx) => (
                 <RepoItemCard key={item} item={item} index={idx} isSequenced onRemove={() => removeItem(activeRole, activeCategory, item)} />
               ))}
-              {config[activeRole][activeCategory.toLowerCase() as keyof typeof config.PD].length === 0 && (
+              {(!config[activeRole] || config[activeRole][activeCategory.toLowerCase() as keyof RoleConfig].length === 0) && (
                 <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1', padding: '2rem', border: '2px dashed #f1f5f9', borderRadius: '1rem' }}>
                   <MousePointer2 size={32} style={{ opacity: 0.1, marginBottom: '0.5rem' }} />
                   <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}>Drop Components Here</span>

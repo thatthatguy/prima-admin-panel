@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TableSchema, RecordData } from '../types';
 import { createRecord, updateRecord } from '../services/mockDataService';
-import { X, Save, AlertCircle } from 'lucide-react';
+import { X, Save } from 'lucide-react';
 
 interface EditFormModalProps {
   table: TableSchema;
@@ -41,39 +41,42 @@ const EditFormModal: React.FC<EditFormModalProps> = ({ table, initialData, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-in slide-in-from-bottom-4 duration-300 overflow-hidden">
-        <form onSubmit={handleSubmit}>
-          <div className="p-6 border-b flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-800">
+    <div className="modal-backdrop">
+      <div className="modal-container">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <div className="modal-header">
+            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
               {isEditing ? `Edit ${table.name}` : `New ${table.name}`}
             </h2>
-            <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600">
-              <X size={24} />
+            <button type="button" onClick={onClose} className="action-btn">
+              <X size={20} />
             </button>
           </div>
 
-          <div className="p-8 space-y-5 max-h-[60vh] overflow-y-auto">
+          <div className="modal-body custom-scroll">
             {table.columns.map((col) => {
+              // Hide primary keys and non-editable fields during edit if needed
               if (col.isPrimaryKey && isEditing) return null;
               if (!col.isEditable && isEditing) return null;
 
               return (
-                <div key={col.name} className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-1">
+                <div key={col.name} className="form-group">
+                  <label className="form-label">
                     {col.label}
-                    {!col.isNullable && <span className="text-red-500">*</span>}
+                    {!col.isNullable && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
                   </label>
                   
                   {col.type === 'BIT' ? (
-                    <div className="flex items-center gap-3">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0' }}>
                       <input
                         type="checkbox"
                         checked={!!formData[col.name]}
                         onChange={(e) => handleChange(col.name, e.target.checked)}
-                        className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                       />
-                      <span className="text-sm text-slate-600">{formData[col.name] ? 'Active' : 'Inactive'}</span>
+                      <span className={`badge ${formData[col.name] ? 'badge-active' : 'badge-inactive'}`}>
+                        {formData[col.name] ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
                   ) : col.type === 'DECIMAL' || col.type === 'INT' || col.type === 'BIGINT' ? (
                     <input
@@ -82,7 +85,8 @@ const EditFormModal: React.FC<EditFormModalProps> = ({ table, initialData, onClo
                       required={!col.isNullable}
                       value={formData[col.name] ?? ''}
                       onChange={(e) => handleChange(col.name, e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                      className="form-input"
+                      placeholder={`Enter ${col.label.toLowerCase()}...`}
                     />
                   ) : col.type === 'DATE' || col.type === 'DATETIME2' ? (
                     <input
@@ -90,7 +94,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({ table, initialData, onClo
                       required={!col.isNullable}
                       value={formData[col.name]?.split('T')[0] ?? ''}
                       onChange={(e) => handleChange(col.name, e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                      className="form-input"
                     />
                   ) : (
                     <input
@@ -99,7 +103,7 @@ const EditFormModal: React.FC<EditFormModalProps> = ({ table, initialData, onClo
                       placeholder={`Enter ${col.label.toLowerCase()}...`}
                       value={formData[col.name] ?? ''}
                       onChange={(e) => handleChange(col.name, e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                      className="form-input"
                     />
                   )}
                 </div>
@@ -107,24 +111,21 @@ const EditFormModal: React.FC<EditFormModalProps> = ({ table, initialData, onClo
             })}
           </div>
 
-          <div className="p-6 bg-slate-50 border-t flex justify-end gap-3">
+          <div className="modal-footer">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-200 transition-colors"
+              className="enterprise-btn-secondary"
+              disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="enterprise-btn-primary"
             >
-              {loading ? (
-                 <div className="w-4 h-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
-              ) : (
-                <Save size={18} />
-              )}
+              {loading ? <span className="animate-spin">⌛</span> : <Save size={18} />}
               {isEditing ? 'Save Changes' : 'Create Record'}
             </button>
           </div>
