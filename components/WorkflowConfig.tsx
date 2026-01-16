@@ -21,7 +21,7 @@ import { RoleType, ConfigCategory, WorkflowConfig as IWorkflowConfig } from '../
 // Extend pool items with Roles
 const ASSET_POOL = {
   ...POOL_ITEMS,
-  Roles: ["PD", "CoM", "RmO", "Approver", "Observer", "Finance", "Legal"]
+  Roles: ["PD", "CoM", "RMO", "RO", "HQ", "IDF", "PCST"]
 };
 
 type RepositoryTab = ConfigCategory | 'Roles';
