@@ -26,14 +26,19 @@ export interface TemporalRecord extends RecordData {
   VersionId: string;
 }
 
-export interface FilterCondition {
-  column: string;
-  value: string;
-  operator: 'contains' | 'equals' | 'greaterThan' | 'lessThan';
-}
+// Workflow Types
+export type RoleType = 'PD' | 'CoM' | 'RmO';
+export type ConfigCategory = 'Fields' | 'Validations' | 'Procedures';
 
-export interface PaginationState {
-  currentPage: number;
-  pageSize: number;
-  totalRecords: number;
+export interface WorkflowConfig {
+  id: string;
+  name: string;
+  phase: string;
+  roles: {
+    [key in RoleType]: {
+      fields: string[];
+      validations: string[];
+      procedures: string[];
+    };
+  };
 }

@@ -26,3 +26,27 @@ export const SCHEMAS: TableSchema[] = [
     ]
   }
 ];
+
+export const WORKFLOW_PHASES = [
+  "Conceptualization",
+  "Proposal Development and Approval for Submission",
+  "Proposal Development and Endorsement",
+  "Project Activation"
+];
+
+export const POOL_ITEMS = {
+  Fields: [
+    "RMO (Managing Mission)", "RMO (Impl. Mission)", "CoM (Managing Mission)", 
+    "CoM (Impl. Mission)", "Endorser", "HQ", "Secondary Fin. Reviewer", 
+    "CC", "Comments"
+  ],
+  Validations: [
+    "TASK COMMENTS", "RMO Managing Mission", "RMO Implementing Mission",
+    "COM Managing Mission", "COM Implementing Mission", "Financial Secondary Reviewer",
+    "Check Pending Tasks"
+  ],
+  Procedures: [
+    "ADD_COMMENT", "CREATE_TASK_RO", "ADD_RO_GROUP", "COMPLETE_TASK",
+    "CREATE_TASK_RMOCOM", "REMOVE_PD_COPD", "ADD_COPD", "APPROVE_TASK", "REMOVE_RRMO"
+  ]
+};
