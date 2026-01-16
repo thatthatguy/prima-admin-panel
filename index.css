@@ -1,0 +1,216 @@
+
+:root {
+  /* Colors */
+  --primary-blue: #1E3A8A;
+  --accent-blue: #3b82f6;
+  --bg-slate-50: #f8fafc;
+  --bg-slate-100: #f1f5f9;
+  --text-slate-400: #94a3b8;
+  --text-slate-700: #334155;
+  --text-slate-900: #0f172a;
+  --border-slate-200: #e2e8f0;
+  
+  /* Role Colors */
+  --role-pd-bg: #fef2f2;
+  --role-pd-border: #fecaca;
+  --role-pd-active: #ef4444;
+  --role-com-bg: #eff6ff;
+  --role-com-border: #bfdbfe;
+  --role-com-active: #2563eb;
+  --role-rmo-bg: #f5f3ff;
+  --role-rmo-border: #ddd6fe;
+  --role-rmo-active: #7c3aed;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-slate-50);
+  color: var(--text-slate-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+.enterprise-app { height: 100vh; overflow: hidden; }
+
+/* Layout Components */
+.layout-container { display: flex; height: 100vh; }
+
+.main-sidebar {
+  width: 72px;
+  background-color: var(--primary-blue);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top-header {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid var(--border-slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+
+/* Sidebar Nav */
+.nav-item {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  color: #bfdbfe;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item:hover { background-color: #1e40af; color: white; }
+.nav-item.active { background-color: var(--accent-blue); color: white; box-shadow: var(--shadow-lg); }
+
+/* Workflow Components */
+.workflow-view { display: flex; height: 100%; background: var(--bg-slate-50); }
+
+.repo-aside {
+  width: 256px;
+  background: white;
+  border-right: 1px solid var(--border-slate-200);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+}
+
+.repo-item {
+  background: var(--bg-slate-50);
+  border: 1px solid var(--border-slate-200);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-slate-700);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: grab;
+  margin-bottom: 0.375rem;
+  transition: all 0.2s;
+}
+
+.repo-item:hover { border-color: var(--accent-blue); background: #eff6ff80; }
+
+.canvas-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas-frame {
+  flex: 1;
+  background: white;
+  border: 1px solid var(--border-slate-200);
+  border-radius: 2rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  overflow: auto;
+}
+
+.canvas-grid-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: radial-gradient(var(--primary-blue) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Role Groups and Joint Stacking */
+.role-group-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 2.5rem;
+  background: rgba(248, 250, 252, 0.5);
+  border: 1px solid var(--bg-slate-100);
+  min-width: 120px;
+  position: relative;
+}
+
+.role-node {
+  width: 80px;
+  height: 80px;
+  border-radius: 1.5rem;
+  border-width: 4px;
+  border-style: solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.role-node.selected { transform: scale(1.1); box-shadow: var(--shadow-xl); z-index: 20; }
+.role-node:hover:not(.selected) { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+.joint-line {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 16px;
+  background: var(--border-slate-200);
+}
+
+/* Custom Scrollbar */
+.custom-scroll::-webkit-scrollbar { width: 6px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+/* Buttons */
+.enterprise-btn-primary {
+  background: var(--primary-blue);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  border: none;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.3);
+  transition: all 0.2s;
+}
+
+.enterprise-btn-primary:hover { transform: scale(1.05); background: #1e3a8aee; }

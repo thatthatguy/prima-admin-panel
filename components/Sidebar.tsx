@@ -12,34 +12,27 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-[72px] bg-[#1E3A8A] min-h-screen flex flex-col items-center py-6 gap-8 text-blue-200 shrink-0 relative">
-      <div className="p-2 mb-4">
-        <Menu size={24} className="cursor-pointer hover:text-white" />
+    <aside className="main-sidebar">
+      <div style={{ padding: '0.5rem', marginBottom: '1rem' }}>
+        <Menu size={24} style={{ cursor: 'pointer', color: '#bfdbfe' }} />
       </div>
       
-      <div className="flex-1 w-full flex flex-col items-center gap-4">
+      <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
         {items.map((item, idx) => (
           <div
             key={idx}
-            className={`w-12 h-12 flex items-center justify-center rounded-xl cursor-pointer transition-all ${
-              item.active 
-                ? 'bg-[#3b82f6] text-white shadow-lg' 
-                : 'hover:bg-blue-800 hover:text-white'
-            }`}
+            className={`nav-item ${item.active ? 'active' : ''}`}
           >
             {item.icon}
           </div>
         ))}
       </div>
 
-      <div className="mt-auto pb-4">
-        <div className="w-12 h-12 flex items-center justify-center rounded-xl hover:bg-blue-800 hover:text-white cursor-pointer transition-all">
+      <div style={{ marginTop: 'auto', paddingBottom: '1rem' }}>
+        <div className="nav-item">
           <HelpCircle size={22} />
         </div>
       </div>
-      
-      {/* Decorative vertical line */}
-      <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
     </aside>
   );
 };
