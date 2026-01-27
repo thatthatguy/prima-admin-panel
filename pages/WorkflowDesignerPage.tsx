@@ -26,6 +26,8 @@ const ASSET_POOL = {
   Roles: ["PD", "CoM", "RMO", "RO", "HQ", "IDF", "PCST"]
 };
 
+const REVIEW_PROCESS_OPTIONS = ["Standard", "IOMDF", "Emergency"];
+
 type RepositoryTab = ConfigCategory | 'Roles';
 
 interface RoleInstance {
@@ -40,10 +42,12 @@ interface RoleGroup {
 
 const WorkflowDesignerPage: React.FC = () => {
   const [selectedPhase, setSelectedPhase] = useState(WORKFLOW_PHASES[0]);
+  const [selectedReviewProcess, setSelectedReviewProcess] = useState(REVIEW_PROCESS_OPTIONS[0]);
   const [workflowName, setWorkflowName] = useState('CN_WITH_BUDGET_WORKFLOW 5');
   const [repoTab, setRepoTab] = useState<RepositoryTab>('Fields');
   const [activeCategory, setActiveCategory] = useState<ConfigCategory>('Fields');
   const [isPhaseOpen, setIsPhaseOpen] = useState(false);
+  const [isReviewProcessOpen, setIsReviewProcessOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Selection Logic (Transitions)
@@ -181,16 +185,31 @@ const WorkflowDesignerPage: React.FC = () => {
       </div>
 
       <div className="canvas-area" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem', gap: '2rem' }}>
-          <div style={{ flex: 1, maxWidth: '300px', position: 'relative' }}>
-            <label style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '4px' }}>Current Phase</label>
-            <button onClick={() => setIsPhaseOpen(!isPhaseOpen)} style={{ width: '100%', background: '#0f172a', color: 'white', padding: '0.625rem 1rem', borderRadius: '12px', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{selectedPhase} <ChevronDown size={18} /></button>
-            {isPhaseOpen && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', marginTop: '4px', zIndex: 50, overflow: 'hidden', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}>
-                {WORKFLOW_PHASES.map(p => <div key={p} onClick={() => { setSelectedPhase(p); setIsPhaseOpen(false); }} style={{ padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', background: selectedPhase === p ? '#2563eb' : 'white', color: selectedPhase === p ? 'white' : '#334155' }}>{p}</div>)}
-              </div>
-            )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', flex: 2 }}>
+            {/* Phase Dropdown */}
+            <div style={{ flex: 1, maxWidth: '280px', position: 'relative' }}>
+              <label style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '4px' }}>Current Phase</label>
+              <button onClick={() => setIsPhaseOpen(!isPhaseOpen)} style={{ width: '100%', background: '#0f172a', color: 'white', padding: '0.625rem 1rem', borderRadius: '12px', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{selectedPhase} <ChevronDown size={18} /></button>
+              {isPhaseOpen && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', marginTop: '4px', zIndex: 50, overflow: 'hidden', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}>
+                  {WORKFLOW_PHASES.map(p => <div key={p} onClick={() => { setSelectedPhase(p); setIsPhaseOpen(false); }} style={{ padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', background: selectedPhase === p ? '#2563eb' : 'white', color: selectedPhase === p ? 'white' : '#334155' }}>{p}</div>)}
+                </div>
+              )}
+            </div>
+
+            {/* Review Process Dropdown */}
+            <div style={{ flex: 1, maxWidth: '220px', position: 'relative' }}>
+              <label style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '4px' }}>Review Process</label>
+              <button onClick={() => setIsReviewProcessOpen(!isReviewProcessOpen)} style={{ width: '100%', background: '#0f172a', color: 'white', padding: '0.625rem 1rem', borderRadius: '12px', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{selectedReviewProcess} <ChevronDown size={18} /></button>
+              {isReviewProcessOpen && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', marginTop: '4px', zIndex: 50, overflow: 'hidden', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}>
+                  {REVIEW_PROCESS_OPTIONS.map(p => <div key={p} onClick={() => { setSelectedReviewProcess(p); setIsReviewProcessOpen(false); }} style={{ padding: '8px 16px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', background: selectedReviewProcess === p ? '#2563eb' : 'white', color: selectedReviewProcess === p ? 'white' : '#334155' }}>{p}</div>)}
+                </div>
+              )}
+            </div>
           </div>
+
           <div style={{ flex: 1, display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
             <div style={{ flex: 1 }}>
               <label style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '4px' }}>Workflow Schema</label>

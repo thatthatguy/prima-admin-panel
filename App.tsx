@@ -6,15 +6,17 @@ import {
   Workflow, 
   LayoutGrid,
   Menu,
-  HelpCircle
+  HelpCircle,
+  TableProperties
 } from 'lucide-react';
 import WorkflowDesignerPage from './pages/WorkflowDesignerPage';
 import RecordExplorerPage from './pages/RecordExplorerPage';
+import UnifiedResultsPage from './pages/UnifiedResultsPage';
 
-type AppPage = 'explorer' | 'designer';
+type AppPage = 'explorer' | 'designer' | 'results';
 
 const App: React.FC = () => {
-  const [activePage, setActivePage] = useState<AppPage>('designer');
+  const [activePage, setActivePage] = useState<AppPage>('results');
 
   return (
     <div className="layout-container">
@@ -25,6 +27,13 @@ const App: React.FC = () => {
         </div>
         
         <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
+          <div 
+            className={`nav-item ${activePage === 'results' ? 'active' : ''}`} 
+            onClick={() => setActivePage('results')}
+            title="Unified Results Module"
+          >
+            <TableProperties size={22} />
+          </div>
           <div 
             className={`nav-item ${activePage === 'explorer' ? 'active' : ''}`} 
             onClick={() => setActivePage('explorer')}
@@ -89,8 +98,10 @@ const App: React.FC = () => {
         <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
           {activePage === 'designer' ? (
             <WorkflowDesignerPage />
-          ) : (
+          ) : activePage === 'explorer' ? (
             <RecordExplorerPage />
+          ) : (
+            <UnifiedResultsPage />
           )}
         </div>
       </main>
